@@ -86,7 +86,8 @@ const interviewReportSchema = new mongoose.Schema({
     preparationPlan: [ preparationPlanSchema ],
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "users"
+        ref: "users",
+        index: true
     },
     title: {
         type: String,
@@ -96,6 +97,7 @@ const interviewReportSchema = new mongoose.Schema({
     timestamps: true
 })
 
+interviewReportSchema.index({ user: 1, createdAt: -1 });
 
 const interviewReportModel = mongoose.model("InterviewReport", interviewReportSchema);
 

@@ -1,5 +1,5 @@
-const { validateEnv, PORT } = require("./src/config/env");
-validateEnv();
+const { validateConfig, PORT } = require("./src/config/env");
+validateConfig();
 
 const app = require("./src/app")
 const connectToDB = require("./src/config/database")

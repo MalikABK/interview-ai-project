@@ -35,3 +35,6 @@
 {"level":"info","message":"GET /api/interview/report/6a0852a1d657fe972eddf7c9","timestamp":"2026-05-16T11:38:07.133Z"}
 {"level":"info","message":"GET /api/interview/report/6a0852a1d657fe972eddf7c9","timestamp":"2026-05-16T11:38:07.370Z"}
 {"level":"info","message":"GET /api/interview/report/6a0852a1d657fe972eddf7c9","timestamp":"2026-05-16T11:38:07.706Z"}
+{"level":"info","message":"GET /api/auth","timestamp":"2026-05-16T12:30:27.458Z"}
+{"level":"info","message":"POST /api/auth/login","timestamp":"2026-05-16T18:28:41.287Z"}
+{"level":"warn","message":"[INVALID_CREDENTIALS] Invalid email or password","timestamp":"2026-05-16T18:28:41.540Z"}

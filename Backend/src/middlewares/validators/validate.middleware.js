@@ -1,3 +1,5 @@
+const AppError = require('../../utils/AppError');
+
 const validate = (schema) => (req, res, next) => {
     try {
         schema.parse({
@@ -7,11 +9,8 @@ const validate = (schema) => (req, res, next) => {
         });
         next();
     } catch (err) {
-        return res.status(400).json({
-            success: false,
-            message: "Validation Error",
-            errors: err.errors.map(e => ({ path: e.path, message: e.message }))
-        });
+        const errors = err.errors.map(e => ({ path: e.path, message: e.message }));
+        next(new AppError('Validation Error', 400, 'VALIDATION_ERROR', errors));
     }
 };
 

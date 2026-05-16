@@ -12,7 +12,8 @@ class ResumeParserService {
             return result.text
         }
 
-        if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        const docxMime = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+        if (mimetype === docxMime) {
             const result = await mammoth.extractRawText({ buffer })
             return result.value
         }

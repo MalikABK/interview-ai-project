@@ -1,15 +1,17 @@
 const InterviewReport = require('../models/interviewReport.model')
 
-const SUMMARY_FIELDS = '-resume -selfDescription -jobDescription -__v -technicalQuestions -behavioralQuestions -skillGaps -preparationPlan'
+const SUMMARY_FIELDS = 'title matchScore createdAt'
 
 class InterviewRepository {
     async create(data) {
         const doc = await InterviewReport.create(data)
-        return doc.toObject()
+        const obj = doc.toObject()
+        delete obj.__v
+        return obj
     }
 
     async findByIdAndUser(id, userId) {
-        return InterviewReport.findOne({ _id: id, user: userId }).lean()
+        return InterviewReport.findOne({ _id: id, user: userId }).select('-__v').lean()
     }
 
     async findAllByUser(userId, page = 1, limit = 10) {
@@ -24,8 +26,17 @@ class InterviewRepository {
                 .lean(),
             InterviewReport.countDocuments({ user: userId })
         ])
+        
+        // Ensure strictly only summary fields are returned
+        const data = docs.map(doc => ({
+            id: doc._id,
+            title: doc.title,
+            matchScore: doc.matchScore,
+            createdAt: doc.createdAt
+        }))
+
         return {
-            data: docs,
+            data,
             pagination: {
                 page,
                 limit,

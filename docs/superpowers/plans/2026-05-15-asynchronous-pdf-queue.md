@@ -18,7 +18,7 @@
 **Files:**
 - Modify: `Backend/package.json`
 
-- [ ] **Step 1: Install dependencies**
+- [x] **Step 1: Install dependencies**
 ```bash
 npm install bullmq ioredis
 ```
@@ -31,7 +31,7 @@ npm install bullmq ioredis
 - Create: `Backend/src/queues/pdfQueue.js`
 - Create: `Backend/src/queues/pdfWorker.js`
 
-- [ ] **Step 1: Define queue**
+- [x] **Step 1: Define queue**
 ```javascript
 // Backend/src/queues/pdfQueue.js
 const { Queue } = require('bullmq');
@@ -40,7 +40,7 @@ const pdfQueue = new Queue('pdf-generation', { connection });
 module.exports = { pdfQueue, connection };
 ```
 
-- [ ] **Step 2: Define worker**
+- [x] **Step 2: Define worker**
 ```javascript
 // Backend/src/queues/pdfWorker.js
 const { Worker } = require('bullmq');
@@ -62,7 +62,7 @@ worker.on('completed', job => console.log(`Job ${job.id} completed!`));
 **Files:**
 - Modify: `Backend/src/controllers/interview.controller.js`
 
-- [ ] **Step 1: Update controller to dispatch jobs**
+- [x] **Step 1: Update controller to dispatch jobs**
 ```javascript
 // Replace generateResumePdfController logic
 const { pdfQueue } = require('../queues/pdfQueue');
@@ -81,7 +81,7 @@ async function generateResumePdfController(req, res) {
 - Modify: `Backend/src/routes/interview.routes.js`
 - Modify: `Backend/src/controllers/interview.controller.js`
 
-- [ ] **Step 1: Add status endpoint**
+- [x] **Step 1: Add status endpoint**
 ```javascript
 // GET /api/interview/status/:jobId
 // Returns 'completed' or 'waiting'

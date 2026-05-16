@@ -2,6 +2,7 @@ const pdfParse = require("pdf-parse")
 const mammoth = require("mammoth")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
+const { pdfQueue } = require("../queues/pdfQueue")
 
 
 
@@ -110,29 +111,101 @@ async function getAllInterviewReportsController(req, res) {
  * @description Controller to generate resume PDF based on user self description, resume and job description.
  */
 async function generateResumePdfController(req, res) {
-    const { interviewReportId } = req.params
+    try {
+        const { interviewReportId } = req.params
 
-    const interviewReport = await interviewReportModel.findOne({
-        _id: interviewReportId,
-        user: req.user.id
-    })
+        const interviewReport = await interviewReportModel.findOne({
+            _id: interviewReportId,
+            user: req.user.id
+        })
 
-    if (!interviewReport) {
-        return res.status(404).json({
-            message: "Interview report not found."
+        if (!interviewReport) {
+            return res.status(404).json({
+                message: "Interview report not found."
+            })
+        }
+
+        const { resume, jobDescription, selfDescription } = interviewReport
+
+        const job = await pdfQueue.add('generate-pdf', {
+            interviewReportId: interviewReport._id,
+            resume,
+            jobDescription,
+            selfDescription
+        });
+
+        res.status(202).json({
+            message: "PDF generation started.",
+            jobId: job.id
+        })
+    } catch (error) {
+        console.error("Error queueing PDF job:", error);
+        res.status(500).json({
+            message: "Error starting PDF generation."
         })
     }
-
-    const { resume, jobDescription, selfDescription } = interviewReport
-
-    const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription })
-
-    res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
-    })
-
-    res.send(pdfBuffer)
 }
 
-module.exports = { generateInterViewReportController, getInterviewReportByIdController, getAllInterviewReportsController, generateResumePdfController }
+/**
+ * @description Controller to check the status of a PDF generation job.
+ */
+async function getPdfStatusController(req, res) {
+    const { jobId } = req.params;
+
+    try {
+        const job = await pdfQueue.getJob(jobId);
+
+        if (!job) {
+            return res.status(404).json({ message: "Job not found." });
+        }
+
+        const status = await job.getState();
+        res.status(200).json({
+            jobId: job.id,
+            status: status, // 'waiting', 'active', 'completed', 'failed', 'delayed'
+            progress: job.progress
+        });
+    } catch (error) {
+        console.error("Error fetching job status:", error);
+        res.status(500).json({ message: "Error fetching job status." });
+    }
+}
+
+/**
+ * @description Controller to download the generated resume PDF.
+ */
+async function downloadResumePdfController(req, res) {
+    const { interviewReportId } = req.params;
+
+    try {
+        const interviewReport = await interviewReportModel.findOne({
+            _id: interviewReportId,
+            user: req.user.id
+        });
+
+        if (!interviewReport || !interviewReport.resumePdf) {
+            return res.status(404).json({
+                message: "PDF not found or not yet generated."
+            });
+        }
+
+        res.set({
+            "Content-Type": "application/pdf",
+            "Content-Disposition": `attachment; filename=resume_${interviewReportId}.pdf`
+        });
+
+        res.send(interviewReport.resumePdf);
+    } catch (error) {
+        console.error("Error downloading PDF:", error);
+        res.status(500).json({ message: "Error downloading PDF." });
+    }
+}
+
+module.exports = { 
+    generateInterViewReportController, 
+    getInterviewReportByIdController, 
+    getAllInterviewReportsController, 
+    generateResumePdfController,
+    getPdfStatusController,
+    downloadResumePdfController
+}

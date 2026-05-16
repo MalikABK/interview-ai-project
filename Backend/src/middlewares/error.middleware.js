@@ -20,7 +20,8 @@ const errorHandler = (err, req, res, next) => {
     }
     
     if (err.code === 11000) {
-        const value = err.errmsg.match(/(["'])(\\?.)*?\1/)[0];
+        const match = err.errmsg.match(/(["'])(\\?.)*?\1/);
+        const value = match ? match[0] : 'unknown';
         err.message = `Duplicate field value: ${value}. Please use another value!`;
         err.statusCode = 409;
         err.errorCode = 'DUPLICATE_FIELD';

@@ -1,7 +1,8 @@
 const { Worker } = require('bullmq');
-const { connection } = require('./pdfQueue');
+const connection = require('../config/redis');
 const { generateResumePdf } = require('../services/ai.service');
-const interviewReportModel = require('../models/interviewReport.model');
+const interviewReportModel = require('../infrastructure/models/interviewReport.model');
+const { QUEUE } = require('../config/constants');
 
 const worker = new Worker('pdf-generation', async (job) => {
     const { interviewReportId, resume, jobDescription, selfDescription } = job.data;
@@ -21,7 +22,10 @@ const worker = new Worker('pdf-generation', async (job) => {
         console.error(`Error generating PDF for job ${job.id}:`, error);
         throw error;
     }
-}, { connection });
+}, { 
+    connection,
+    concurrency: QUEUE.PDF_CONCURRENCY
+});
 
 worker.on('completed', job => {
     console.log(`Job ${job.id} has completed!`);

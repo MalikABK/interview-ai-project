@@ -19,7 +19,7 @@ describe('Environment Validation', () => {
 
   test('should not throw error when all required envs are present', () => {
     process.env.MONGO_URI = 'mongodb://localhost:27017/test';
-    process.env.JWT_SECRET = 'secret';
+    process.env.JWT_SECRET = 'supersecretkey123';
     process.env.GOOGLE_GENAI_API_KEY = 'key';
     expect(() => validateConfig()).not.toThrow();
   });

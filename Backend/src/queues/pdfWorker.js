@@ -12,7 +12,7 @@ const worker = new Worker('pdf-generation', async (job) => {
         const pdfBuffer = await generateResumePdf({ resume, jobDescription, selfDescription });
         
         await interviewReportModel.findByIdAndUpdate(interviewReportId, {
-            resumePdf: pdfBuffer
+            resumePdf: Buffer.from(pdfBuffer)
         });
         
         console.log(`PDF generated and saved for report ${interviewReportId}`);

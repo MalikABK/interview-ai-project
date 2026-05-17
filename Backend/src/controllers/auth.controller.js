@@ -1,11 +1,11 @@
-const userModel = require("../../../models/user.model")
-const auditLog = require("../../../services/auditLog.service")
+const userModel = require("../infrastructure/models/user.model")
+const auditLog = require("../services/auditLog.service")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")
 const crypto = require("crypto")
-const refreshTokenModel = require("../../../infrastructure/models/refreshToken.model")
-const AppError = require("../../../utils/AppError")
-const { HTTP_STATUS } = require("../../../shared/constants")
+const refreshTokenModel = require("../infrastructure/models/refreshToken.model")
+const AppError = require("../utils/AppError")
+const { HTTP_STATUS } = require("../shared/constants")
 
 // ============================================================
 // ACCOUNT LOCKOUT SERVICE

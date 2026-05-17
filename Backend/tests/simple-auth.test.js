@@ -29,6 +29,7 @@ describe('Auth Controller Login', () => {
         // we expect the logic to pass if the findByEmail exists.
         
         // This is a minimal test to confirm the controller finds the method.
-        await expect(authController.login(req, res)).rejects.toThrow();
+        await authController.loginUserController(req, res);
+        expect(res.statusCode).toBe(401);
     });
 });

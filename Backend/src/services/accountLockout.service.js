@@ -1,4 +1,4 @@
-const userModel = require("../models/user.model");
+const userModel = require("../infrastructure/models/user.model");
 const loginAttemptModel = require("../models/loginAttempt.model");
 const auditLog = require("./auditLog.service");
 

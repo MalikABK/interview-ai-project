@@ -1,5 +1,6 @@
 const resumeParser = require('./resume-parser.service')
 const aiService = require('../services/ai.service')
+const promptInjectionService = require('../../services/promptInjection.service')
 const interviewRepo = require('../../infrastructure/repositories/interview.repository')
 const { ERROR_MESSAGES, AI, HTTP_STATUS } = require('../../shared/constants')
 const AppError = require('../../utils/AppError')
@@ -12,19 +13,30 @@ class InterviewService {
             throw new AppError(ERROR_MESSAGES.EMPTY_RESUME, HTTP_STATUS.BAD_REQUEST, 'EMPTY_RESUME')
         }
 
-        // 2. Prompt injection guard — truncate inputs
+        // 2. Prompt injection guard — advanced analysis
+        const selfDescAnalysis = await promptInjectionService.analyzePrompt(selfDescription, userId, 'self_description')
+        if (!selfDescAnalysis.isValid) {
+            throw new AppError(`Self description security check failed: ${selfDescAnalysis.message}`, HTTP_STATUS.BAD_REQUEST, 'PROMPT_INJECTION_DETECTED')
+        }
+
+        const jobDescAnalysis = await promptInjectionService.analyzePrompt(jobDescription, userId, 'job_description')
+        if (!jobDescAnalysis.isValid) {
+            throw new AppError(`Job description security check failed: ${jobDescAnalysis.message}`, HTTP_STATUS.BAD_REQUEST, 'PROMPT_INJECTION_DETECTED')
+        }
+
+        // 3. Truncate inputs for AI context limits
         const safeResume = resumeText.slice(0, AI.MAX_RESUME_CHARS)
         const safeSelfDesc = selfDescription.slice(0, AI.MAX_SELF_DESC_CHARS)
         const safeJobDesc = jobDescription.slice(0, AI.MAX_JOB_DESC_CHARS)
 
-        // 3. Generate AI report
+        // 4. Generate AI report
         const aiResult = await aiService.generateInterviewReport({
             resume: safeResume,
             selfDescription: safeSelfDesc,
             jobDescription: safeJobDesc
         })
 
-        // 4. Persist and return
+        // 5. Persist and return
         return interviewRepo.create({
             user: userId,
             resume: resumeText,

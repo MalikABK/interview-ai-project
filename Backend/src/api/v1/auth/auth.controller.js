@@ -1,4 +1,4 @@
-const userModel = require("../../../models/user.model")
+const userModel = require("../../../infrastructure/models/user.model")
 const auditLog = require("../../../services/auditLog.service")
 const bcrypt = require("bcryptjs")
 const jwt = require("jsonwebtoken")

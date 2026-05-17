@@ -1,8 +1,15 @@
 const mongoose = require('mongoose');
 const promptInjection = require('../../src/services/promptInjection.service');
+const auditLog = require('../../src/services/auditLog.service');
+
+// Mock auditLog service
+jest.mock('../../src/services/auditLog.service', () => ({
+    logEvent: jest.fn().mockResolvedValue({ success: true }),
+    logAuthEvent: jest.fn().mockResolvedValue({ success: true })
+}));
 
 describe('Prompt Injection Detection Service', () => {
-    const validUserId = new mongoose.Types.ObjectId();
+    const validUserId = new mongoose.Types.ObjectId().toString();
 
     test('should identify clear injection attempts as invalid', async () => {
         const maliciousPrompts = [
@@ -17,7 +24,6 @@ describe('Prompt Injection Detection Service', () => {
             expect(result.riskScore).toBeGreaterThan(0.1);
         }
     });
-    // ...
 
     test('should identify safe prompts as valid', async () => {
         const safePrompts = [

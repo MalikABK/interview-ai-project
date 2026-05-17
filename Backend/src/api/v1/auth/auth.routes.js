@@ -8,6 +8,7 @@ const authRouter = Router()
 
 authRouter.post('/register', validate(registerSchema), authController.registerUserController)
 authRouter.post('/login', validate(loginSchema), authController.loginUserController)
+authRouter.post('/refresh-token', authController.refreshTokenController)
 authRouter.post('/logout', authMiddleware.authUser, authController.logoutUserController)
 authRouter.get('/get-me', authMiddleware.authUser, authController.getMeController)
 

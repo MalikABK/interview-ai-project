@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const interviewController = require('./interview.controller')
 const authMiddleware = require('../../../middlewares/auth.middleware')
-const upload = require('../../../middlewares/file.middleware')
+const { upload, validateFileUpload } = require('../../../middlewares/file.middleware')
 const validate = require('../../../middlewares/validators/validate.middleware')
 const { generateReportSchema, mongoIdSchema, interviewReportIdSchema, jobIdSchema } = require('../../../middlewares/validators/interview.validator')
 
@@ -10,6 +10,7 @@ const interviewRouter = Router()
 interviewRouter.post('/', 
     authMiddleware.authUser, 
     upload.single('resume'), 
+    validateFileUpload,
     validate(generateReportSchema), 
     interviewController.generateReport
 )

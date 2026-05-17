@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 
+// Schema definition
 const userSessionSchema = new mongoose.Schema({
     userId: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true, index: true },
     sessionId: { type: String, required: true, index: true },
@@ -9,12 +10,11 @@ const userSessionSchema = new mongoose.Schema({
     deviceFingerprint: String,
     createdAt: { type: Date, default: Date.now },
     lastActivityAt: { type: Date, default: Date.now },
-    expiresAt: { type: Date, required: true, index: true },
+    expiresAt: { type: Date, required: true, expires: 0 }, // expires set here directly
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-// TTL Index
-userSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
+// Note: No additional schema.index() needed as expires is defined above
 
 userSessionSchema.statics.revokeSession = async function(userId, sessionId) {
     return this.updateOne({ userId, sessionId }, { isActive: false });

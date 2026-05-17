@@ -167,6 +167,8 @@ class AccountLockoutService {
 // OWASP A07:2021 - Identification and Authentication Failures
 // ============================================================
 
+const emailService = require("../services/email.service")
+
 /**
  * Register user with enhanced security
  */
@@ -222,13 +224,19 @@ async function registerUserController(req, res) {
         const salt = await bcrypt.genSalt(12)
         const hashedPassword = await bcrypt.hash(password, salt)
 
+        // Email verification setup
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+        const verificationHash = crypto.createHash('sha256').update(verificationToken).digest('hex');
+
         // Create user
         const user = await userModel.create({
             username,
             email,
             password: hashedPassword,
             isEmailVerified: false,
-            accountStatus: 'active'
+            accountStatus: 'active',
+            emailVerificationToken: verificationHash,
+            emailVerificationTokenExpiry: new Date(Date.now() + 24 * 60 * 60 * 1000)
         })
 
         // Log registration
@@ -245,6 +253,8 @@ async function registerUserController(req, res) {
             userAgent: req.get('User-Agent'),
             riskLevel: 'low'
         })
+
+        await emailService.sendVerificationEmail(email, verificationToken);
 
         res.status(201).json({
             message: "User registered successfully. Please verify your email.",
